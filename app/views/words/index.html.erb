@@ -1,0 +1,21 @@
+<h1>Words#index</h1>
+
+<h1>Words</h1>
+
+<ul>
+  <% @words.each do |wrd| %>
+    <li>
+
+    <%= link_to wrd.word, wrd %>
+
+  </a>
+
+
+    </li>
+  <% end %>
+</ul>
+
+<%= paginate @words %>
+<br/>
+<%= link_to "New Word", new_word_path %>
+<p>Find me in app/views/words/index.html.erb</p>
