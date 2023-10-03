@@ -9,8 +9,14 @@ default: &default
   timeout: 5000
 
 development:
-  <<: *default
+  primary:
+    <<: *default
+    database: prepared_development
+    port: 5432
   primary_replica:
+    <<: *default
+    database: prepared_development
+    adapter: postgresql
     replica: true
     database_tasks: false
 test:
