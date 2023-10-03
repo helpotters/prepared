@@ -4,7 +4,7 @@ class CreateWords < ActiveRecord::Migration[7.0]
       t.string :word, null: false
       t.string :part_of_speech
 
-      t.index :word, unique: true
+      t.index :word
       t.timestamps
     end
   end
