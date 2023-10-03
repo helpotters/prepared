@@ -15,17 +15,20 @@ ActiveRecord::Schema[7.2].define(version: 2023_10_03_173922) do
   enable_extension "plpgsql"
 
   create_table "definitions", force: :cascade do |t|
+    t.bigint "word_id"
     t.string "definition"
     t.string "example_sentence"
-    t.bigint "word_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["word_id"], name: "index_definitions_on_word_id"
+    t.index ["word_id"], name: "index_definitions_on_word_id", unique: true
   end
 
   create_table "words", force: :cascade do |t|
+    t.string "word", null: false
+    t.string "part_of_speech"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["word"], name: "index_words_on_word", unique: true
   end
 
   add_foreign_key "definitions", "words"
