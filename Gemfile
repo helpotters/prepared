@@ -70,3 +70,12 @@ end
 gem "pg", "~> 1.5"
 
 gem "dip", "~> 7.6", :group => :development
+
+# added by Andy
+gem "dotenv-rails"
+gem "erb-formatter"
+gem "rest-client"
+gem "kaminari"
+gem "rufo"
+gem "yabeda-rails"
+gem "yabeda-prometheus"
