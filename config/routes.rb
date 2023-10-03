@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   root "words#index"
 
   concern :paginatable do
@@ -12,4 +11,7 @@ Rails.application.routes.draw do
     resources :definitions
   end
 
+  namespace :api do
+    resources :words, concerns: :paginatable, :defaults => { :format => "json" }, :only => [:create, :index, :show]
+  end
 end
