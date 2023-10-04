@@ -1,0 +1,19 @@
+<h1><%= @word.word %></h1>
+
+<p><%= @word.part_of_speech %></p>
+
+<% @word.definitions.each { |defin| %>
+  <p>
+    <%= defin.definition %>
+  </p>
+  <% } %>
+
+    <ul>
+      <li><%= link_to "Edit", edit_word_path(@word) %></li>
+      <li><%= link_to "Destroy",
+        word_path(@word),
+        data: {
+          turbo_method: :delete,
+          turbo_confirm: "Are you sure?"
+        } %></li>
+    </ul>
