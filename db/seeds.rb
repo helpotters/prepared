@@ -46,6 +46,7 @@ seed_dictionary.each do |dictionary_word|
     definition_data << {
       word_id: nil, # We'll update this later
       word: word, # We'll remove this from the hash before using #upsert_all
+      part_of_speech: part_of_speech,
       definition: definition,
     }
   else
@@ -53,21 +54,42 @@ seed_dictionary.each do |dictionary_word|
   end
 end
 
+# Benchmark the SQL execution
 time_elapsed = Benchmark.realtime do
   # Use upsert_all to create or update Word records
-  Word.upsert_all(word_data)
-  # Fetch the Word records to get their IDs
-  word_lookup_data = Word.where(word: word_data.map { |word_lookup| word_lookup[:word] }).pluck(:id, :word).to_h
+  # A word is considered an unique parent based of its part of speech (ie, Abandon (V), Abandon(Adj))
+  Word.upsert_all(word_data.uniq { |word| [word[:word], word[:part_of_speech]] })
+
+  # Fetch the Word records to get their IDs in a single query
+  word_lookup_data = {}
+  word_records = Word.where(
+    word: word_data.map { |lookup| lookup[:word] },
+    part_of_speech: word_data.map { |lookup| lookup[:part_of_speech] },
+  ).pluck(:id, :word, :part_of_speech)
+
+  word_records.each do |id, word, part_of_speech|
+    word_lookup_data[word.to_sym] ||= {}
+    word_lookup_data[word.to_sym][part_of_speech.to_sym] = id
+  end
 
   # Associate definitions with words and use upsert_all for Definition records
   definition_data.each do |definition_hash|
-    # Use the :word key to look up the :word_id
-    definition_hash[:word_id] = word_lookup_data[definition_hash[:word]]
-    # Remove the reference :word key from the hash as it's not an attribute.
-    definition_hash.delete(:word)
+    word_id = word_lookup_data[definition_hash[:word].to_sym][definition_hash[:part_of_speech].to_sym]
+    if word_id
+      # Use the :word_id obtained from the lookup
+      definition_hash[:word_id] = word_id
+      # Remove the reference :word and :part_of_speech keys from the hash as they're not attributes.
+      definition_hash.delete(:word)
+      definition_hash.delete(:part_of_speech)
+    else
+      # Handle the case where the word/part_of_speech combination was not found
+      # You may want to log an error or take other appropriate action here.
+    end
   end
+
   # Use upsert_all for Definition records, ensuring uniqueness based on both word_id and definition
-  Definition.upsert_all(definition_data, unique_by: [:word_id])
+  # #uniq is required due to duplicate definitions due to parents being merged on :part_of_speech
+  Definition.upsert_all(definition_data.uniq { |defin| [defin[:word_id], defin[:definition]] })
 end
 
 puts "Database seeding completed in #{time_elapsed} seconds."
