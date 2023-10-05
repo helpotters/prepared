@@ -79,3 +79,5 @@ gem "kaminari"
 gem "rufo"
 gem "yabeda-rails"
 gem "yabeda-prometheus"
+
+gem "terminal-table"
