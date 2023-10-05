@@ -20,7 +20,7 @@ ActiveRecord::Schema[7.2].define(version: 2023_10_03_173922) do
     t.string "example_sentence"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["word_id"], name: "index_definitions_on_word_id", unique: true
+    t.index ["word_id"], name: "index_definitions_on_word_id"
   end
 
   create_table "words", force: :cascade do |t|
