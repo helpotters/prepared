@@ -5,9 +5,7 @@
 <ul>
   <% @words.each do |wrd| %>
     <li>
-
-    <%= link_to wrd.word, wrd %>
-
+    <%= link_to "#{wrd.word}. #{wrd.part_of_speech}", wrd %>
   </a>
 
       
