@@ -31,7 +31,6 @@ interaction:
     service: rails
     command: bundle
     compose_run_options: [no-deps]
-
   rails:
     description: Run Rails commands
     service: rails
@@ -49,6 +48,18 @@ interaction:
         environment:
           RAILS_ENV: test
 
+  cache:
+    description: Run caching tasks
+    service: rails
+    commands: rails cache:submit_queries
+    environment:
+      RAILS_ENV: development
+  ready:
+    description: Run caching tasks
+    service: rails
+    commands: rails cache:check_status
+    environment:
+      RAILS_ENV: development
   yarn:
     description: Run Yarn commands
     service: rails
@@ -63,9 +74,10 @@ interaction:
 
   readysetgo:
     description: Run ReadySet psql console
-    service: readyset
+    service: postgres
     default_args: prepared_development
-    command: psql postgres://postgres:postgres@postgres:5433/prepared_development
+    # ReadySet url needs to be manually set
+    command: psql "postgres://postgres:postgres@cache:5433/prepared_development"
 
 provision:
   # We need the `|| true` part because some docker-compose versions
