@@ -1,3 +1,4 @@
+version: "3.8"
 x-app: &app
   build:
     context: .
@@ -49,13 +50,11 @@ services:
   rails:
     <<: *backend
     command: bundle exec rails
-
   web:
     <<: *backend
     command: bundle exec rails server -b 0.0.0.0
     ports:
       - "3000:3000"
-
   postgres:
     image: postgres:15
     volumes:
@@ -65,20 +64,27 @@ services:
     environment:
       PSQL_HISTFILE: /usr/local/hist/.psql_history
       POSTGRES_PASSWORD: postgres
-    ports:
+      POSTGRES_DB: prepared_development
+    expose:
       - 5432
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
     healthcheck:
-      test: pg_isready -U postgres -h 127.0.0.1
+      test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
-
-  readyset:
-    <<: *backend
-    image: "public.ecr.aws/readyset/readyset:beta-latest"
+      timeout: 5s
+      retries: 12
+  cache:
+    tty: true
+    image: "public.ecr.aws/readyset/readyset:latest"
     platform: linux/amd64
     volumes:
       - readyset:/state
     environment:
       DEPLOYMENT_ENV: quickstart_docker
+      PROMETHEUS_METRICS: true
       DB_DIR: /state
       QUERY_CACHING: explicit
       QUERY_LOG: true
@@ -86,22 +92,45 @@ services:
       STANDALONE: true
       DEPLOYMENT: docker_compose_deployment
       LISTEN_ADDRESS: 0.0.0.0:5433
-      UPSTREAM_DB_URL: DATABASE_URL
-      READYSET_URL: postgres://postgres:postgres@postgres:5433
+      UPSTREAM_DB_URL: postgres://postgres:postgres@postgres:5432/prepared_development
       CONTROLLER_ADDRESS: 0.0.0.0
+    restart: on-failure
     ports:
       # The ReadySet Adapter listen port, i.e. what your application / SQL shell connects to
       - "5433:5433"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-      - "db:host-gateway"
+      - "6034:6034"
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
-      test: curl --fail 127.0.0.1:6033/health
+      test: ["CMD", "curl", "--fail", "127.0.0.1:6034/health"]
       interval: 2s
       timeout: 1s
       retries: 5
       start_period: 5s
-
+  prometheus:
+    image: "public.ecr.aws/readyset/readyset-prometheus:latest"
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9090"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    expose:
+      - 9090
+    volumes:
+      - "prometheus:/prometheus"
+  pushgateway:
+    image: prom/pushgateway
+    expose:
+      - 9091
+  grafana:
+    image: "public.ecr.aws/readyset/readyset-grafana:latest"
+    ports:
+      - 4000:4000
+    environment:
+      UPSTREAM_DB_URL: postgres://postgres:postgres@localhost:5432/prepared_development
+      RS_PORT: 5433
+      RS_GRAFANA_PORT: 4000
 volumes:
   bundle:
   node_modules:
@@ -110,3 +139,4 @@ volumes:
   postgres:
   assets:
   readyset:
+  prometheus:
