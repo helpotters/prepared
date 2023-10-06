@@ -2,42 +2,43 @@
 
 This is an Ruby on Rails application that demonstrates how to get up and running with [ReadySet](https://github.com/readysettech/readyset). You could use it as the base of your new project or as a guide to Dockerize your own Rails app running with ReadySet.
 
-This application follows the Rails motto of &ldquo;Convention over Configuration&rdquo; to simplify the experience of using a fully-dockerized Rails app in addition to the ReadySet caching layer.
+> Convention over configuration
 
-    
+We&rsquo;ll be using some tools from [Evil Martians](https://evilmartians.com/) to make this installation a more maintainable and extendable experience.
+
 # Table of Contents
 
-1.  [Getting Started](#org7b86bdd)
-    1.  [Prerequisites](#orgd015a94)
-        1.  [Docker](#orga328469)
-        2.  [Dip (Docker interaction program)](#org61139e2)
-    2.  [Clone the repository](#org5c9e74d)
-    3.  [Add the environmental variables](#org9d75114)
-    4.  [Build and run the docker compose services](#orgf89384e)
-    5.  [Setup the database](#org60e0478)
-2.  [Caching](#orgf63cf94)
-    1.  [Check on initialization progress](#org32200dd)
-    2.  [Caching queries](#orgc3951d8)
-3.  [Customization](#orgb3fbc95)
-4.  [Contribution](#org9d19d79)
-5.  [Additional Resources](#org0447fce)
-6.  [About](#orgdabb203)
-7.  [Future improvements](#orga3f9e82)
+1.  [Getting Started](#orgde4af30)
+    1.  [Prerequisites](#org96dfc8d)
+        1.  [Docker](#org2ea9c0e)
+        2.  [Dip (Docker interaction program)](#orgff28e06)
+    2.  [Clone the repository](#orge8c80e0)
+    3.  [Add the environmental variables](#orgd61e0d6)
+    4.  [Build and run the docker compose services](#org1be1141)
+    5.  [Setup the database](#org1ce814c)
+2.  [Caching](#orgd3ce2e4)
+    1.  [Check if ReadySet is, well, Ready](#orgcfaba0a)
+    2.  [Caching queries](#orgbcf6c4d)
+3.  [Customization](#orgc8fc92e)
+4.  [Contribution](#org8f4640f)
+5.  [Additional Resources](#orgc7efe93)
+6.  [About](#orgf397f10)
+7.  [Future improvements](#org6081fe6)
 
 
-<a id="org7b86bdd"></a>
+<a id="orgde4af30"></a>
 
 # Getting Started
 
 Follow these steps to get the application running on Docker, including a working example of a dictionary. At the end, we will also show you how to cache queries to ReadySet.
 
 
-<a id="orgd015a94"></a>
+<a id="org96dfc8d"></a>
 
 ## Prerequisites
 
 
-<a id="orga328469"></a>
+<a id="org2ea9c0e"></a>
 
 ### Docker
 
@@ -45,19 +46,19 @@ Ensure that you have [Docker](https://docs.docker.com/get-docker/) installed, in
 
     docker compose version
 
-This should return something like `Docker Compose version v2.xx.0`.
+This should return something like `Docker Compose version v2.xx.0`. If not, follow the Docker documentation to install it.
 
 
-<a id="org61139e2"></a>
+<a id="orgff28e06"></a>
 
 ### Dip (Docker interaction program)
 
-Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martians). It greatly simplifies how we&rsquo;ll be interacting with all the different parts of this dockerized application. Convention over Configuration!
+Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martians). It greatly simplifies how we&rsquo;ll be interacting with all the different parts of this dockerized application.
 
     gem install dip
 
 
-<a id="org5c9e74d"></a>
+<a id="orge8c80e0"></a>
 
 ## Clone the repository
 
@@ -65,18 +66,27 @@ Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martian
     cd prepared
 
 
-<a id="org9d75114"></a>
+<a id="orgd61e0d6"></a>
 
 ## Add the environmental variables
 
-In `./.dockerdev`, let&rsquo;s make a `.env` file to pass the environmental variables. It is best to ignore it in your version control system.
+In `./.dockerdev`, let&rsquo;s make a `.env` file to pass the environmental variables. Make sure add `.env` to your `.gitignore` file at the root of the project.
 
     touch ./.dockerdev/.env
 
 And inside that file, let&rsquo;s add the following default values.
 
+    DATABASE_URL=postgres://postgres:postgres@postgres:5432
+    DB_NAME=prepared_development
+    DB_USER=postgres
+    DB_PASSWORD=postgres
+    
+    READYSET_URL="postgres://postgres:postgres@cache:5433/${DB_NAME}"
+    # ReadySet
+    UPSTREAM_DB_URL="${DATABASE_URL}/${DB_NAME}"
 
-<a id="orgf89384e"></a>
+
+<a id="org1be1141"></a>
 
 ## Build and run the docker compose services
 
@@ -99,7 +109,7 @@ Then we&rsquo;ll have all the services run.
 And now you have a Rails app and environment! Visit `http://127.0.0.1:3000` to see the index page. Now let&rsquo;s seed the database so we have some words to lookup.
 
 
-<a id="org60e0478"></a>
+<a id="org1ce814c"></a>
 
 ## Setup the database
 
@@ -116,18 +126,20 @@ And now we&rsquo;ll seed the database with example data (around 120K+ words from
     dip rails db:seed
 
 
-<a id="orgf63cf94"></a>
+<a id="orgd3ce2e4"></a>
 
 # Caching
 
-ReadySet provides performances to postgres via a SQL caching layer. It does by turning the execution plans of submitted queries into a *representation* of what the database *was* going to perform.
+Using ReadySet, we&rsquo;ll cache our *queries* not our data.
 
-It&rsquo;ll store the relevant data in memory, and requests will pass through that representation until it finds its data. If it doesn&rsquo;t, it&rsquo;ll just pass through to the database.
+> Using an analogy, it&rsquo;s like making a second smaller library where 80% of visitors will find what they want. To have it organized, we&rsquo;ll need to still use the same &rsquo;model&rsquo; of how they would find the books in the main library. If the efficient library doesn&rsquo;t have it, a librarian will be find a book for a guest using the *same* method of access.
+
+So, let&rsquo;s start caching.
 
 
-<a id="org32200dd"></a>
+<a id="orgcfaba0a"></a>
 
-## Check on initialization progress
+## Check if ReadySet is, well, Ready
 
 One of our Docker services is one called **cache**. This is the ReadySet caching layer, which is listening to our **postgres** server.
 
@@ -135,10 +147,10 @@ Let&rsquo;s check on the `cache` container&rsquo;s snapshotting progress.
 
     dip rails cache:check_status
 
-Ideally, it&rsquo;ll say `"Completed"`. That will confirm that ReadySet is ready to cache queries.
+Ideally, it&rsquo;ll say `"Completed"`. That will confirm that ReadySet is ready to cache queries. If not, we&rsquo;ll have to wait until it&rsquo;s done.
 
 
-<a id="orgc3951d8"></a>
+<a id="orgbcf6c4d"></a>
 
 ## Caching queries
 
@@ -159,29 +171,29 @@ And we can view the caches with the following:
 > This would the part where we would look at the &ldquo;confirmation&rdquo; of Noria working.
 
 
-<a id="orgb3fbc95"></a>
+<a id="orgc8fc92e"></a>
 
 # Customization
 
 -   Relevant files/config to make it easy for a user to modify the application to their own needs.
 
 
-<a id="org9d19d79"></a>
+<a id="org8f4640f"></a>
 
 # Contribution
 
 
-<a id="org0447fce"></a>
+<a id="orgc7efe93"></a>
 
 # Additional Resources
 
 
-<a id="orgdabb203"></a>
+<a id="orgf397f10"></a>
 
 # About
 
 
-<a id="orga3f9e82"></a>
+<a id="org6081fe6"></a>
 
 # Future improvements
 
