@@ -1,0 +1,126 @@
+#+title: README
+[[./project-logo.png]]
+
+This is an Ruby on Rails application that demonstrates how to get up and running with [[https://github.com/readysettech/readyset][ReadySet]]. You could use it as the base of your new project or as a guide to Dockerize your own Rails app running with ReadySet.
+
+This application follows the Rails motto of "Convention over Configuration" to simplify the experience of using a fully-dockerized Rails app in addition to the ReadySet caching layer.
+* Getting Started
+Follow these steps to get the application running on Docker, including a working example of a dictionary. At the end, we will also show you how to cache queries to ReadySet.
+** Prerequisites
+*** Docker
+Ensure that you have [[https://docs.docker.com/get-docker/][Docker]] installed, including Docker Compose v2 support.
+
+#+begin_src bash
+docker compose version
+#+end_src
+This should return something like =Docker Compose version v2.xx.0=.
+*** Dip (Docker interaction program)
+Install [[https://github.com/bibendi/dip][bibendi/dip]] (sponsored by Evil Martians). It greatly simplifies how we'll be interacting with all the different parts of this dockerized application. Convention over Configuration!
+  #+begin_src bash
+gem install dip
+  #+end_src
+** Clone the repository
+#+begin_src bash
+git clone https://github.com/helpotters/prepared.git
+cd prepared
+#+end_src
+** Add the environmental variables
+In =./.dockerdev=, let's make a =.env= file to pass the environmental variables. It is best to ignore it in your version control system.
+
+#+begin_src bash
+touch ./.dockerdev/.env
+#+end_src
+
+And inside that file, let's add the following default values.
+
+#+begin_src
+DATABASE_URL=postgres://postgres:postgres@postgres:5432
+DB_NAME=prepared_development
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+READYSET_URL="postgres://postgres:postgres@cache:5433/${DB_NAME}"
+# ReadySet
+UPSTREAM_DB_URL="${DATABASE_URL}/${DB_NAME}"
+#+end_src
+** Build and run the docker compose services
+Downloading the Docker images may take a while depending on your internet connection speed and hardware.
+
+Instead of using the normal Docker cli tool, we'll be using =dip=:
+#+begin_src bash
+dip up --build
+#+end_src
+
+Then install the gems.
+#+begin_src bash
+dip bundle # defined in dip.yml
+#+end_src
+
+Then we'll have all the services run.
+#+begin_src bash
+dip up -d # the -d flag allows it to run the background
+#+end_src
+
+#+begin_quote
+ You can also use =dip down= to shut down the containers. Check dip.yml for all of the available commands.
+#+end_quote
+
+And now you have a Rails app and environment! Visit =http://127.0.0.1:3000= to see the index page. Now let's seed the database so we have some words to lookup.
+** Setup the database
+Create the database:
+#+begin_src bash
+dip rails db:create
+#+end_src
+
+Perform the migrations for =Word= and =Defintions=:
+#+begin_src bash
+dip rails db:migrate
+#+end_src
+
+And now we'll seed the database with example data (around 120K+ words from the English dictionary). This should only take around 1 minute.
+#+begin_src bash
+dip rails db:seed
+#+end_src
+* Caching
+ReadySet provides performances to postgres via a SQL caching layer. It does by turning the execution plans of submitted queries into a /representation/ of what the database /was/ going to perform.
+
+It'll store the relevant data in memory, and requests will pass through that representation until it finds its data. If it doesn't, it'll just pass through to the database.
+** Check on initialization progress
+One of our Docker services is one called *cache*. This is the ReadySet caching layer, which is listening to our *postgres* server.
+
+Let's check on the =cache= container's snapshotting progress.
+
+#+begin_src bash
+dip rails cache:check_status
+#+end_src
+
+Ideally, it'll say ="Completed"=. That will confirm that ReadySet is ready to cache queries.
+** Caching queries
+The following queries are the ones we're running in our application.
+
+#+begin_src
+SELECT "definitions".* FROM "definitions" WHERE ("definitions"."word_id" = $1)
+SELECT "words".* FROM "words" WHERE ("words"."id" = $1)
+SELECT "words".* FROM "words" WHERE ("words"."id" = $1) ORDER BY "words"."id" ASC
+#+end_src
+
+Let's cache those queries using this easy command.
+#+begin_src bash
+dip rails cache:submit_queries
+#+end_src
+
+And we can view the caches with the following:
+#+begin_src bash
+dip rails cache:views_caches
+#+end_src
+
+#+begin_quote
+This would the part where we would look at the "confirmation" of Noria working.
+#+end_quote
+* Customization
+- Relevant files/config to make it easy for a user to modify the application to their own needs.
+* Contribution
+* Additional Resources
+* About
+* Future improvements
+- Metrics currently don't showcase the improvements.
