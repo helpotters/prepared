@@ -29,10 +29,10 @@ x-backend: &backend
     - ./.bashrc:/root/.bashrc:ro
   environment: &backend_environment
     <<: *env
-    DATABASE_URL: postgres://postgres:postgres@postgres:5432
-    DB_NAME: prepared_development
-    DB_USER: postgres
-    DB_PASSWORD: postgres
+    DATABASE_URL: ${DATABASE_URL}
+    DB_NAME: ${DB_NAME}
+    DB_USER: ${DB_USER:-postgres}
+    DB_PASSWORD: ${DB_PASSWORD:-postgres}
     MALLOC_ARENA_MAX: 2
     WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
     BOOTSNAP_CACHE_DIR: /usr/local/bundle/_bootsnap
@@ -92,7 +92,7 @@ services:
       STANDALONE: true
       DEPLOYMENT: docker_compose_deployment
       LISTEN_ADDRESS: 0.0.0.0:5433
-      UPSTREAM_DB_URL: postgres://postgres:postgres@postgres:5432/prepared_development
+      UPSTREAM_DB_URL: ${UPSTREAM_DB_URL}
       CONTROLLER_ADDRESS: 0.0.0.0
     restart: on-failure
     ports:
@@ -128,7 +128,7 @@ services:
     ports:
       - 4000:4000
     environment:
-      UPSTREAM_DB_URL: postgres://postgres:postgres@localhost:5432/prepared_development
+      UPSTREAM_DB_URL: ${UPSTREAM_DB_URL}
       RS_PORT: 5433
       RS_GRAFANA_PORT: 4000
 volumes:
