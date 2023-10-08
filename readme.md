@@ -8,37 +8,37 @@ We&rsquo;ll be using some tools from [Evil Martians](https://evilmartians.com/) 
 
 # Table of Contents
 
-1.  [Getting Started](#org671e9fc)
-    1.  [Prerequisites](#org314fe84)
-        1.  [Docker](#orgf62f624)
-        2.  [Dip (Docker interaction program)](#orgffe4cb8)
-    2.  [Clone the repository](#orgf75f687)
-    3.  [Add the environmental variables](#orgc35d90a)
-    4.  [Build and run the docker compose services](#org546707f)
-    5.  [Setup the database](#orgecb5ab7)
-2.  [Caching](#org19e82d5)
-    1.  [Check if ReadySet is, well, Ready](#org652a04d)
-    2.  [Caching queries](#org6daf539)
-3.  [Customization](#org57a9cfb)
-4.  [Contribution](#orgeb0ac7a)
-5.  [Additional Resources](#org4fc5dee)
-6.  [About](#org4ed9e4b)
-7.  [Future improvements](#org75811c0)
+1.  [Getting Started](#org776e7d0)
+    1.  [Prerequisites](#orgdf82dde)
+        1.  [Docker](#orgd915805)
+        2.  [Dip (Docker interaction program)](#org98bcd17)
+    2.  [Clone the repository](#orga74e390)
+    3.  [Add the environmental variables](#orgd4d747a)
+    4.  [Build and run the docker compose services](#orgb90e50b)
+    5.  [Setup the database](#org05f9fa7)
+2.  [Caching](#orga362622)
+    1.  [Check if ReadySet is, well, Ready](#org7c01add)
+    2.  [Caching queries](#orgd24d4ad)
+3.  [Customization](#org04233d2)
+4.  [Contribution](#org47fa2c6)
+5.  [Additional Resources](#org4535192)
+6.  [About](#org6c184bf)
+7.  [Future improvements](#orgfb719e8)
 
 
-<a id="org671e9fc"></a>
+<a id="org776e7d0"></a>
 
 # Getting Started
 
 Follow these steps to get the application running on Docker, including a working example of a dictionary. At the end, we will also show you how to cache queries to ReadySet.
 
 
-<a id="org314fe84"></a>
+<a id="orgdf82dde"></a>
 
 ## Prerequisites
 
 
-<a id="orgf62f624"></a>
+<a id="orgd915805"></a>
 
 ### Docker
 
@@ -49,7 +49,7 @@ Ensure that you have [Docker](https://docs.docker.com/get-docker/) installed, in
 This should return something like `Docker Compose version v2.xx.0`. If not, follow the Docker documentation to install it.
 
 
-<a id="orgffe4cb8"></a>
+<a id="org98bcd17"></a>
 
 ### Dip (Docker interaction program)
 
@@ -58,7 +58,7 @@ Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martian
     gem install dip
 
 
-<a id="orgf75f687"></a>
+<a id="orga74e390"></a>
 
 ## Clone the repository
 
@@ -66,7 +66,7 @@ Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martian
     cd prepared
 
 
-<a id="orgc35d90a"></a>
+<a id="orgd4d747a"></a>
 
 ## Add the environmental variables
 
@@ -86,7 +86,7 @@ And inside that file, let&rsquo;s add the following default values.
     UPSTREAM_DB_URL="${DATABASE_URL}/${DB_NAME}"
 
 
-<a id="org546707f"></a>
+<a id="orgb90e50b"></a>
 
 ## Build and run the docker compose services
 
@@ -109,7 +109,7 @@ Then we&rsquo;ll have all the services run.
 And now you have a Rails app and environment! Visit `http://127.0.0.1:3000` to see the index page. Now let&rsquo;s seed the database so we have some words to lookup.
 
 
-<a id="orgecb5ab7"></a>
+<a id="org05f9fa7"></a>
 
 ## Setup the database
 
@@ -126,18 +126,18 @@ And now we&rsquo;ll seed the database with example data (around 120K+ words from
     dip rails db:seed
 
 
-<a id="org19e82d5"></a>
+<a id="orga362622"></a>
 
 # Caching
 
 Using ReadySet, we&rsquo;ll cache our *queries* not our data.
 
-> Using an analogy, it&rsquo;s like making a second smaller library where 80% of visitors will find what they want. To have it organized, we&rsquo;ll need to still use the same &rsquo;model&rsquo; of how they would find the books in the main library. If the efficient library doesn&rsquo;t have it, a librarian will be find a book for a guest using the *same* method of access.
+> Imagine creating a smaller, more efficient grocery store where 80% of shoppers can easily find what they need. If the smaller store doesn&rsquo;t have a particular item, they&rsquo;ll find it at the main store by walking the same, but now longer, path.
 
-So, let&rsquo;s start caching.
+Now, let&rsquo;s see how we can cache our most common queries.
 
 
-<a id="org652a04d"></a>
+<a id="org7c01add"></a>
 
 ## Check if ReadySet is, well, Ready
 
@@ -150,7 +150,7 @@ Let&rsquo;s check on the `cache` container&rsquo;s snapshotting progress.
 Ideally, it&rsquo;ll say `"Completed"`. That will confirm that ReadySet is ready to cache queries. If not, we&rsquo;ll have to wait until it&rsquo;s done.
 
 
-<a id="org6daf539"></a>
+<a id="orgd24d4ad"></a>
 
 ## Caching queries
 
@@ -171,29 +171,29 @@ And we can view the caches with the following:
 > This would the part where we would look at the &ldquo;confirmation&rdquo; of Noria working.
 
 
-<a id="org57a9cfb"></a>
+<a id="org04233d2"></a>
 
 # Customization
 
 -   Relevant files/config to make it easy for a user to modify the application to their own needs.
 
 
-<a id="orgeb0ac7a"></a>
+<a id="org47fa2c6"></a>
 
 # Contribution
 
 
-<a id="org4fc5dee"></a>
+<a id="org4535192"></a>
 
 # Additional Resources
 
 
-<a id="org4ed9e4b"></a>
+<a id="org6c184bf"></a>
 
 # About
 
 
-<a id="org75811c0"></a>
+<a id="orgfb719e8"></a>
 
 # Future improvements
 
