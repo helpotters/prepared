@@ -8,37 +8,37 @@ We&rsquo;ll be using some tools from [Evil Martians](https://evilmartians.com/) 
 
 # Table of Contents
 
-1.  [Getting Started](#orgde4af30)
-    1.  [Prerequisites](#org96dfc8d)
-        1.  [Docker](#org2ea9c0e)
-        2.  [Dip (Docker interaction program)](#orgff28e06)
-    2.  [Clone the repository](#orge8c80e0)
-    3.  [Add the environmental variables](#orgd61e0d6)
-    4.  [Build and run the docker compose services](#org1be1141)
-    5.  [Setup the database](#org1ce814c)
-2.  [Caching](#orgd3ce2e4)
-    1.  [Check if ReadySet is, well, Ready](#orgcfaba0a)
-    2.  [Caching queries](#orgbcf6c4d)
-3.  [Customization](#orgc8fc92e)
-4.  [Contribution](#org8f4640f)
-5.  [Additional Resources](#orgc7efe93)
-6.  [About](#orgf397f10)
-7.  [Future improvements](#org6081fe6)
+1.  [Getting Started](#org671e9fc)
+    1.  [Prerequisites](#org314fe84)
+        1.  [Docker](#orgf62f624)
+        2.  [Dip (Docker interaction program)](#orgffe4cb8)
+    2.  [Clone the repository](#orgf75f687)
+    3.  [Add the environmental variables](#orgc35d90a)
+    4.  [Build and run the docker compose services](#org546707f)
+    5.  [Setup the database](#orgecb5ab7)
+2.  [Caching](#org19e82d5)
+    1.  [Check if ReadySet is, well, Ready](#org652a04d)
+    2.  [Caching queries](#org6daf539)
+3.  [Customization](#org57a9cfb)
+4.  [Contribution](#orgeb0ac7a)
+5.  [Additional Resources](#org4fc5dee)
+6.  [About](#org4ed9e4b)
+7.  [Future improvements](#org75811c0)
 
 
-<a id="orgde4af30"></a>
+<a id="org671e9fc"></a>
 
 # Getting Started
 
 Follow these steps to get the application running on Docker, including a working example of a dictionary. At the end, we will also show you how to cache queries to ReadySet.
 
 
-<a id="org96dfc8d"></a>
+<a id="org314fe84"></a>
 
 ## Prerequisites
 
 
-<a id="org2ea9c0e"></a>
+<a id="orgf62f624"></a>
 
 ### Docker
 
@@ -49,7 +49,7 @@ Ensure that you have [Docker](https://docs.docker.com/get-docker/) installed, in
 This should return something like `Docker Compose version v2.xx.0`. If not, follow the Docker documentation to install it.
 
 
-<a id="orgff28e06"></a>
+<a id="orgffe4cb8"></a>
 
 ### Dip (Docker interaction program)
 
@@ -58,7 +58,7 @@ Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martian
     gem install dip
 
 
-<a id="orge8c80e0"></a>
+<a id="orgf75f687"></a>
 
 ## Clone the repository
 
@@ -66,7 +66,7 @@ Install [bibendi/dip](https://github.com/bibendi/dip) (sponsored by Evil Martian
     cd prepared
 
 
-<a id="orgd61e0d6"></a>
+<a id="orgc35d90a"></a>
 
 ## Add the environmental variables
 
@@ -86,7 +86,7 @@ And inside that file, let&rsquo;s add the following default values.
     UPSTREAM_DB_URL="${DATABASE_URL}/${DB_NAME}"
 
 
-<a id="org1be1141"></a>
+<a id="org546707f"></a>
 
 ## Build and run the docker compose services
 
@@ -98,18 +98,18 @@ Instead of using the normal Docker cli tool, we&rsquo;ll be using `dip`:
 
 Then install the gems.
 
-    dip bundle # defined in dip.yml
+    dip bundle
 
 Then we&rsquo;ll have all the services run.
 
-    dip up -d # the -d flag allows it to run the background
+    dip up -d
 
 > You can also use `dip down` to shut down the containers. Check dip.yml for all of the available commands.
 
 And now you have a Rails app and environment! Visit `http://127.0.0.1:3000` to see the index page. Now let&rsquo;s seed the database so we have some words to lookup.
 
 
-<a id="org1ce814c"></a>
+<a id="orgecb5ab7"></a>
 
 ## Setup the database
 
@@ -126,7 +126,7 @@ And now we&rsquo;ll seed the database with example data (around 120K+ words from
     dip rails db:seed
 
 
-<a id="orgd3ce2e4"></a>
+<a id="org19e82d5"></a>
 
 # Caching
 
@@ -137,7 +137,7 @@ Using ReadySet, we&rsquo;ll cache our *queries* not our data.
 So, let&rsquo;s start caching.
 
 
-<a id="orgcfaba0a"></a>
+<a id="org652a04d"></a>
 
 ## Check if ReadySet is, well, Ready
 
@@ -150,7 +150,7 @@ Let&rsquo;s check on the `cache` container&rsquo;s snapshotting progress.
 Ideally, it&rsquo;ll say `"Completed"`. That will confirm that ReadySet is ready to cache queries. If not, we&rsquo;ll have to wait until it&rsquo;s done.
 
 
-<a id="orgbcf6c4d"></a>
+<a id="org6daf539"></a>
 
 ## Caching queries
 
@@ -171,29 +171,29 @@ And we can view the caches with the following:
 > This would the part where we would look at the &ldquo;confirmation&rdquo; of Noria working.
 
 
-<a id="orgc8fc92e"></a>
+<a id="org57a9cfb"></a>
 
 # Customization
 
 -   Relevant files/config to make it easy for a user to modify the application to their own needs.
 
 
-<a id="org8f4640f"></a>
+<a id="orgeb0ac7a"></a>
 
 # Contribution
 
 
-<a id="orgc7efe93"></a>
+<a id="org4fc5dee"></a>
 
 # Additional Resources
 
 
-<a id="orgf397f10"></a>
+<a id="org4ed9e4b"></a>
 
 # About
 
 
-<a id="org6081fe6"></a>
+<a id="org75811c0"></a>
 
 # Future improvements
 
