@@ -3,7 +3,11 @@
 
 This is an Ruby on Rails application that demonstrates how to get up and running with [[https://github.com/readysettech/readyset][ReadySet]]. You could use it as the base of your new project or as a guide to Dockerize your own Rails app running with ReadySet.
 
-This application follows the Rails motto of "Convention over Configuration" to simplify the experience of using a fully-dockerized Rails app in addition to the ReadySet caching layer.
+#+begin_quote
+Convention over configuration
+#+end_quote
+
+We'll be using some tools from [[https://evilmartians.com/][Evil Martians]] to make this installation a more maintainable and extendable experience.
 * Getting Started
 Follow these steps to get the application running on Docker, including a working example of a dictionary. At the end, we will also show you how to cache queries to ReadySet.
 ** Prerequisites
@@ -13,9 +17,9 @@ Ensure that you have [[https://docs.docker.com/get-docker/][Docker]] installed, 
 #+begin_src bash
 docker compose version
 #+end_src
-This should return something like =Docker Compose version v2.xx.0=.
+This should return something like =Docker Compose version v2.xx.0=. If not, follow the Docker documentation to install it.
 *** Dip (Docker interaction program)
-Install [[https://github.com/bibendi/dip][bibendi/dip]] (sponsored by Evil Martians). It greatly simplifies how we'll be interacting with all the different parts of this dockerized application. Convention over Configuration!
+Install [[https://github.com/bibendi/dip][bibendi/dip]] (sponsored by Evil Martians). It greatly simplifies how we'll be interacting with all the different parts of this dockerized application.
   #+begin_src bash
 gem install dip
   #+end_src
@@ -25,14 +29,13 @@ git clone https://github.com/helpotters/prepared.git
 cd prepared
 #+end_src
 ** Add the environmental variables
-In =./.dockerdev=, let's make a =.env= file to pass the environmental variables. It is best to ignore it in your version control system.
+In =./.dockerdev=, let's make a =.env= file to pass the environmental variables. Make sure add =.env= to your =.gitignore= file at the root of the project.
 
 #+begin_src bash
 touch ./.dockerdev/.env
 #+end_src
 
 And inside that file, let's add the following default values.
-
 #+begin_src
 DATABASE_URL=postgres://postgres:postgres@postgres:5432
 DB_NAME=prepared_development
@@ -53,19 +56,19 @@ dip up --build
 
 Then install the gems.
 #+begin_src bash
-dip bundle # defined in dip.yml
+dip bundle
 #+end_src
 
 Then we'll have all the services run.
 #+begin_src bash
-dip up -d # the -d flag allows it to run the background
+dip up -d
 #+end_src
 
 #+begin_quote
  You can also use =dip down= to shut down the containers. Check dip.yml for all of the available commands.
 #+end_quote
 
-And now you have a Rails app and environment! Visit =http://127.0.0.1:3000= to see the index page. Now let's seed the database so we have some words to lookup.
+And now you have a Rails app and environment! We'll be able to see our index page at =http://127.0.0.1:3000= in the browser. So, let's go ahead and setup our database.
 ** Setup the database
 Create the database:
 #+begin_src bash
@@ -82,10 +85,14 @@ And now we'll seed the database with example data (around 120K+ words from the E
 dip rails db:seed
 #+end_src
 * Caching
-ReadySet provides performances to postgres via a SQL caching layer. It does by turning the execution plans of submitted queries into a /representation/ of what the database /was/ going to perform.
+Using ReadySet, we'll cache our /queries/ not our data.
 
-It'll store the relevant data in memory, and requests will pass through that representation until it finds its data. If it doesn't, it'll just pass through to the database.
-** Check on initialization progress
+#+begin_quote
+Imagine creating a smaller, more efficient grocery store where 80% of shoppers can easily find what they need. If the smaller store doesn't have a particular item, they'll find it at the main store by walking the same, but now longer, path.
+#+end_quote
+
+Now, let's see how we can cache our most common queries.
+** Check if ReadySet is, well, Ready
 One of our Docker services is one called *cache*. This is the ReadySet caching layer, which is listening to our *postgres* server.
 
 Let's check on the =cache= container's snapshotting progress.
@@ -94,7 +101,7 @@ Let's check on the =cache= container's snapshotting progress.
 dip rails cache:check_status
 #+end_src
 
-Ideally, it'll say ="Completed"=. That will confirm that ReadySet is ready to cache queries.
+Ideally, it'll say ="Completed"=. That will confirm that ReadySet is ready to cache queries. If not, we'll have to wait until it's done.
 ** Caching queries
 The following queries are the ones we're running in our application.
 
