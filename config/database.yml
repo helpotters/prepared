@@ -7,31 +7,28 @@ default: &default
   password: <%= ENV['DB_PASSWORD'] %>
   url: <%= ENV['DATABASE_URL'] %>
   timeout: 5000
-  readyset:
-    username: postgres
-    password: readyset
-    adapter: readyset
-    host: "127.0.0.1"
-    port: 5433
-    # This setting tells Rails that there's no need to run migrations or other database
-    # administration tasks against ReadySet
-    database_tasks: false
 
 development:
   primary:
-    <<: *default
-    database: prepared_development
+    # This is the connection information for your primary database
+    database: <%= ENV['DB_NAME'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    adapter: postgresql
     port: 5432
   readyset:
-    <<: *default
-    # This is the connection information for ReadySet
-    database: prepared_development
+    database: <%= ENV['DB_NAME'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    host: <%= ENV['DB_HOST'] %>
+    adapter: readyset
+    port: 5433
+
 test:
   <<: *default
   database: <%= ENV['POSTGRES_TEST_DB'] %>
   readyset:
     <<: *default
-    # This is the connection information for ReadySet
     database: prepared_test
 production:
   <<: *default
